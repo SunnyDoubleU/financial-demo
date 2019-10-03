@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+
+  <script src="data.js"></script>
+</head>
+
+<body>
+
+  <input type="date" id="date1" value="2018-07-22">
+  <input type="date" id="date2" value="2018-08-22">
+  <button type="submit" id="subButton">Submit</button>
+
+
+  <canvas id="myChart" width="1000" height="500"> </canvas>
+  <script>
+
+    window.onload = function () {
+      var subButton = document.getElementById("subButton")
+      var ctx = document.getElementById('myChart');
+      var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          // labels: labelsArr,
+          labels: [],
+          datasets: [{
+            label: 'Bitcoin Price Index',
+            // data: valueArr,
+            data: [],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+
+      function addData(chart, labelsArr, valueArr) {
+        myChart.data.labels = labelsArr
+        myChart.data.datasets[0].data = valueArr
+        chart.update()
+      }
+      subButton.addEventListener("click", function () {
+
+        var date1 = document.getElementById("date1")
+        var date2 = document.getElementById("date2")
+        var date1Value = date1.value
+        var date2Value = date2.value
+
+        axios.get(`https://api.coindesk.com/v1/bpi/historical/close.json?start=${date1Value}&end=${date2Value}`)
+          .then(response => {
+            var coinData = response.data.bpi
+            var labelsArr = []
+            var valueArr = []
+            Object.keys(coinData).forEach((key, index) => {
+              labelsArr.push(key)//key
+              valueArr.push(coinData[key])
+            })
+            addData(myChart, labelsArr, valueArr)
+          })
+      })
+    }
+
+  </script>
+</body>
+
+</html>
